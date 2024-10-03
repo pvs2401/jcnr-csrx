@@ -1,0 +1,100 @@
+set version 20240329.040217_builder.r1411880
+set groups base apply-flags omit
+set groups base apply-macro ht jcnr
+set groups base system root-authentication encrypted-password "$6$saICyPJLp8NE1MHj$3NTW.piXUYsBS1zxVF.dH8zdIsl46Bs9gwXNPFQH2wgJUZjaVy3t7g3cRmj2GVbg8av8UcxvwtDOXRZEtJP9x1"
+set groups base system commit xpath
+set groups base system commit constraints direct-access
+set groups base system commit notification configuration-diff-format xml
+set groups base system scripts action max-datasize 256m
+set groups base system scripts language python3
+set groups base system services netconf ssh
+set groups base system services ssh root-login allow
+set groups base system services ssh port 24
+set groups base system services extension-service request-response grpc clear-text address 127.0.0.1
+set groups base system services extension-service request-response grpc clear-text port 50051
+set groups base system services extension-service request-response grpc skip-authentication
+set groups base system syslog host 127.0.0.1 any any
+set groups base system syslog host 127.0.0.1 kernel none
+set groups base system syslog host 127.0.0.1 interactive-commands notice
+set groups base system syslog host 127.0.0.1 port 50055
+set groups base system syslog host 127.0.0.1 transport udp
+set groups base system syslog host 127.0.0.1 match-strings license-check
+set groups base system syslog host 127.0.0.1 match-strings jcnr-init
+set groups base system syslog host 127.0.0.1 match-strings cli
+set groups base system syslog host 127.0.0.1 match-strings _LOG
+set groups base system syslog host 127.0.0.1 structured-data
+set groups base system syslog source-address 127.0.0.1
+set groups base interfaces irb unit 0 mac 48:5a:0d:f4:70:f6
+set groups base routing-options resolution rib :gribi.inet6.0 inet6-resolution-ribs :gribi.inet6.0
+set groups base routing-options forwarding-table channel vrouter protocol protocol-type gRPC
+set groups base routing-options forwarding-table channel vrouter protocol destination 127.0.0.1:50052
+set groups cni apply-flags omit
+set groups cni apply-macro ht jcnr
+set groups cni routing-instances trust instance-type virtual-router
+set groups cni routing-instances trust routing-options static route 172.200.0.2/32 qualified-next-hop 172.200.0.2 interface jvknet2-af7ce01
+set groups cni routing-instances trust routing-options static route 10.20.1.2/32 qualified-next-hop 10.20.1.2 interface vhosteth2-21b74285-7403-4aa0-a5
+set groups cni routing-instances trust routing-options static route 172.20.0.0/30 qualified-next-hop 10.20.1.2 interface vhosteth2-21b74285-7403-4aa0-a5
+set groups cni routing-instances trust interface jvknet2-af7ce01
+set groups cni routing-instances trust interface vhosteth2-21b74285-7403-4aa0-a5
+set groups cni routing-instances untrust instance-type vrf
+set groups cni routing-instances untrust routing-options static route 10.200.1.2/32 qualified-next-hop 10.200.1.2 interface vhosteth1-21b74285-7403-4aa0-a5
+set groups cni routing-instances untrust interface vhosteth1-21b74285-7403-4aa0-a5
+set groups cni routing-instances untrust route-distinguisher 10:10
+set groups cni routing-instances untrust vrf-target target:10:10
+set groups internal apply-flags omit
+set groups internal apply-macro ht jcnr
+set groups internal system commit xpath
+set groups internal system commit constraints direct-access
+set groups internal system commit notification configuration-diff-format xml
+set groups internal system scripts language python3
+set groups internal event-options policy save_config events UI_COMMIT_COMPLETED
+set groups internal event-options policy save_config then execute-commands commands "start shell sh command /config/scripts/save-config.sh"
+set groups internal event-options policy save_config then execute-commands output-filename save_config
+deactivate groups internal event-options policy save_config then execute-commands output-filename
+set groups internal event-options policy save_config then execute-commands destination local
+deactivate groups internal event-options policy save_config then execute-commands destination local
+set groups internal event-options policy save_config then execute-commands output-format text
+set groups internal event-options destinations local archive-sites /var/tmp
+deactivate groups internal event-options destinations
+set apply-groups base
+set apply-groups internal
+set apply-groups cni
+set system root-authentication encrypted-password "$6$ltpA9$kOw8rgZ4UpN4WnydJ9LVnIBFziqsrIy9UEtLm68RhcCFD5RVLAjmcwHJxtlNyhMvZA0MOp3E0GRn20ONpA70A1"
+set system login user jcluser uid 2000
+set system login user jcluser class super-user
+set system login user jcluser authentication encrypted-password "$6$SSkaJ$jSGSGDIRx9U60SIc.RKpcNmHNNTT/cRpX3IhwByxr35xRSjf/qlHuRB1diIqOtkInVql4YADLRtr05hou.9160"
+set system services ssh root-login allow
+set interfaces eth1 unit 0 family inet address 10.0.0.6/30
+set interfaces eth2 unit 0 family inet address 172.31.10.1/30
+set interfaces lo0 unit 0 family inet address 10.255.0.3/32
+set interfaces lo0 unit 0 family iso address 47.0001.0010.0255.0000.0003.00
+set interfaces lo0 unit 0 family mpls
+set policy-options policy-statement pplb term 1 then load-balance per-packet
+set routing-instances vpn1 instance-type vrf
+set routing-instances vpn1 protocols bgp group toCE type external
+set routing-instances vpn1 protocols bgp group toCE as-override
+set routing-instances vpn1 protocols bgp group toCE neighbor 172.31.10.2 peer-as 64512
+set routing-instances vpn1 interface eth2
+set routing-instances vpn1 vrf-target target:65000:1
+set routing-instances vpn1 vrf-table-label
+set routing-options route-distinguisher-id 10.255.0.3
+set routing-options router-id 10.255.0.3
+set routing-options autonomous-system 65000
+set routing-options forwarding-table channel vrouter export pplb
+set protocols bgp group vpn-rr type internal
+set protocols bgp group vpn-rr local-address 10.255.0.3
+set protocols bgp group vpn-rr family inet-vpn unicast
+set protocols bgp group vpn-rr family inet6-vpn unicast
+set protocols bgp group vpn-rr family evpn signaling
+set protocols bgp group vpn-rr local-as 65000
+set protocols bgp group vpn-rr neighbor 10.255.0.2 peer-as 65000
+set protocols isis interface eth1 point-to-point
+set protocols isis interface lo0.0 passive
+set protocols isis source-packet-routing srgb start-label 1000
+set protocols isis source-packet-routing srgb index-range 999
+set protocols isis source-packet-routing node-segment ipv4-index 3
+set protocols isis source-packet-routing explicit-null
+set protocols isis level 1 disable
+set protocols isis level 2 wide-metrics-only
+set protocols mpls interface eth1
+set protocols mpls interface lo0.0

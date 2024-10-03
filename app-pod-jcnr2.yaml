@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    k8s.v1.cni.cncf.io/networks: |
+      [
+        {
+          "name": "trust",
+          "interface":"net2",
+          "cni-args": {
+            "interfaceType":"veth",
+            "dataplane":"dpdk",
+            "mac":"aa:bb:cc:dd:ee:12",
+            "ipConfig":{
+              "ipv4":{
+                "address":"172.200.0.2/30",
+                "gateway":"172.200.0.1",
+                "routes":[ "172.0.0.0/8"]
+              }
+            }
+          }
+        }
+      ]
+  labels:
+    app: app-ipsec
+  name: test-ipsec-pod2
+  namespace: default
+spec:
+  containers:
+    - name: veth-pod
+      image: nicolaka/netshoot
+      imagePullPolicy: IfNotPresent
+      command: ["sleep", "infinity"]
+      securityContext:
+        capabilities:
+          add:
+            - NET_ADMIN
+        privileged: true

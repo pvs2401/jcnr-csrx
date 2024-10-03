@@ -1,0 +1,37 @@
+set version 20240621.103832_builder.r1429411
+set system root-authentication encrypted-password *disabled*
+set system services ssh root-login allow
+set interfaces ge-0/0/0 unit 0 family inet address 10.100.1.2/30
+set interfaces ge-0/0/1 unit 0 family inet address 10.10.1.2/30
+set interfaces st0 unit 0 family inet
+set routing-options static route 10.200.1.0/30 next-hop 10.100.1.1/32
+set routing-options static route 172.20.0.0/30 next-hop 10.10.1.1/32
+set security ike proposal ike-phase-10-100-1-2-proposal authentication-method pre-shared-keys
+set security ike proposal ike-phase-10-100-1-2-proposal dh-group group5
+set security ike proposal ike-phase-10-100-1-2-proposal authentication-algorithm sha-256
+set security ike proposal ike-phase-10-100-1-2-proposal encryption-algorithm aes-256-cbc
+set security ike proposal ike-phase-10-100-1-2-proposal lifetime-seconds 3600
+set security ike policy ike-phase-10-100-1-2-policy proposals ike-phase-10-100-1-2-proposal
+set security ike policy ike-phase-10-100-1-2-policy pre-shared-key ascii-text "$9$zt3l3AuIRhev8FnNVsYoaApu0RcSyev8XO1NVYoDj.P5F9AyrKv8X"
+set security ike gateway remote-10-100-1-2 ike-policy ike-phase-10-100-1-2-policy
+set security ike gateway remote-10-100-1-2 address 10.200.1.2
+set security ike gateway remote-10-100-1-2 external-interface ge-0/0/0.0
+set security ike gateway remote-10-100-1-2 local-address 10.100.1.2
+set security ike gateway remote-10-100-1-2 version v2-only
+set security ipsec proposal ipsec-10-100-1-2-proposal protocol esp
+set security ipsec policy ipsec-10-100-1-2-policy perfect-forward-secrecy keys group5
+set security ipsec policy ipsec-10-100-1-2-policy proposals ipsec-10-100-1-2-proposal
+set security ipsec vpn ipsec-remote-10-100-1-2 bind-interface st0.0
+set security ipsec vpn ipsec-remote-10-100-1-2 ike gateway remote-10-100-1-2
+set security ipsec vpn ipsec-remote-10-100-1-2 ike ipsec-policy ipsec-10-100-1-2-policy
+set security ipsec vpn ipsec-remote-10-100-1-2 traffic-selector ts1 local-ip 172.20.0.0/30
+set security ipsec vpn ipsec-remote-10-100-1-2 traffic-selector ts1 remote-ip 172.200.0.0/30
+set security ipsec vpn ipsec-remote-10-100-1-2 establish-tunnels immediately
+set security policies default-policy permit-all
+set security zones security-zone untrust host-inbound-traffic system-services all
+set security zones security-zone untrust host-inbound-traffic protocols all
+set security zones security-zone untrust interfaces ge-0/0/0.0
+set security zones security-zone untrust interfaces st0.0
+set security zones security-zone trust host-inbound-traffic system-services all
+set security zones security-zone trust host-inbound-traffic protocols all
+set security zones security-zone trust interfaces ge-0/0/1.0

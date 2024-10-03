@@ -1,0 +1,15 @@
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: vpn1
+spec:
+  config: '{
+    "cniVersion":"0.4.0",
+    "name": "vpn1",
+    "type": "jcnr",
+    "args": {
+      "vrfName": "vpn1",
+      "vrfTarget": "64512:5000"
+    },
+    "kubeConfig":"/etc/kubernetes/kubelet.conf"
+  }'
